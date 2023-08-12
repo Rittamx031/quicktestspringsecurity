@@ -1,34 +1,56 @@
 package springsecurity.quicktestspringsecurity.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 
-import lombok.RequiredArgsConstructor;
-import springsecurity.quicktestspringsecurity.repo.UserInfoRepository;
-import springsecurity.quicktestspringsecurity.service.UserInfoService;
+import springsecurity.quicktestspringsecurity.repo.KhachHangRepo;
+import springsecurity.quicktestspringsecurity.repo.NhanVienRepo;
+import springsecurity.quicktestspringsecurity.service.KhachHangInfoService;
+import springsecurity.quicktestspringsecurity.service.NhanVienInfoService;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
 @EnableMethodSecurity
 public class SpringSecurityConfig {
-    private final UserInfoRepository repository;
+    @Autowired
+    NhanVienRepo nvifrepository;
+    @Autowired
+    KhachHangRepo khifrepository;
 
-    @Bean
-    UserDetailsService userDetailsService() {
-        return new UserInfoService(repository);
+    // private final UserInfoRepository repository;
+
+    // @Bean
+    // UserDetailsService userDetailsService() {
+    // return new UserInfoService(repository);
+    // }
+
+    NhanVienInfoService nhanVienServer() {
+        return new NhanVienInfoService(nvifrepository);
     }
+
+    KhachHangInfoService KhachHangServer() {
+        return new KhachHangInfoService(khifrepository);
+    }
+
+    // @Override
+    // protected void configure(AuthenticationManagerBuilder auth) throws Exception
+    // {
+    // auth
+    // .authenticationProvider(authenticationProviderTable1())
+    // .authenticationProvider(authenticationProviderTable2());
+    // }
 
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,17 +62,27 @@ public class SpringSecurityConfig {
                     authorize.requestMatchers("api/v2/person/**").permitAll();
                 })
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("/user/new").permitAll();
+                    authorize.anyRequest().permitAll();
                 })
                 .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults());
+                .httpBasic(Customizer.withDefaults())
+                .authenticationProvider(authenticationNVProvider())
+                .authenticationProvider(authenticationKHProvider());
         return http.build();
     }
 
     @Bean
-    AuthenticationProvider authenticationProvider() {
+    AuthenticationProvider authenticationNVProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
+        authenticationProvider.setUserDetailsService(nhanVienServer());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
+    }
+
+    @Bean
+    AuthenticationProvider authenticationKHProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(KhachHangServer());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }

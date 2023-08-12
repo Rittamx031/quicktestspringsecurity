@@ -1,4 +1,4 @@
-package springsecurity.quicktestspringsecurity.controller;
+package springsecurity.quicktestspringsecurity.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,8 @@ import lombok.ToString;
 @NoArgsConstructor
 @ToString
 @Builder
-public class Customer {
-  private String id;
+public class Acc {
   private String name;
-  private String phoneNumber;
-  private String email;
+  private String password;
+  private String roles;
 }

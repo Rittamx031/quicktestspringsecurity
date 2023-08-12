@@ -16,20 +16,20 @@ import org.springframework.web.bind.annotation.RestController;
 import springsecurity.quicktestspringsecurity.entity.Person;
 import springsecurity.quicktestspringsecurity.entity.UserInfo;
 import springsecurity.quicktestspringsecurity.repo.PersonRepository;
-import springsecurity.quicktestspringsecurity.repo.UserInfoRepository;
+// import springsecurity.quicktestspringsecurity.repo.UserInfoRepository;
 
 @RestController
 @RequestMapping("api/v2/person")
 public class PersonController {
     @Autowired
     PersonRepository repository;
-    @Autowired
-    UserInfoRepository usrepository;
+    // @Autowired
+    // UserInfoRepository usrepository;
 
-    @GetMapping("getalluser")
-    public ResponseEntity<List<UserInfo>> getAllUl() {
-        return ResponseEntity.ok().body(usrepository.findAll());
-    }
+    // @GetMapping("getalluser")
+    // public ResponseEntity<List<UserInfo>> getAllUl() {
+    //     return ResponseEntity.ok().body(usrepository.findAll());
+    // }
 
     @GetMapping
     public ResponseEntity<List<Person>> getAll() {
@@ -44,6 +44,11 @@ public class PersonController {
     public ResponseEntity<Person> findPerson(@PathVariable("id") int id) {
         return ResponseEntity.ok().body(repository.findById(id).orElse(null));
     }
+
+    // @GetMapping("/search/{id}")
+    // public ResponseEntity<?> find(@PathVariable("id") String id) {
+    //     return ResponseEntity.ok().body(repository.getuser(id).orElse(null));
+    // }
 
     @PostMapping
     public ResponseEntity<Person> addPerson(@RequestBody Person person) {
