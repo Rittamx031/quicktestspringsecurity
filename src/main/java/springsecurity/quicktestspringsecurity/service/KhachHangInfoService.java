@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import lombok.RequiredArgsConstructor;
 import springsecurity.quicktestspringsecurity.config.UserInfoUserDetails;
 import springsecurity.quicktestspringsecurity.entity.KhachHang;
-import springsecurity.quicktestspringsecurity.entity.NhanVien;
 import springsecurity.quicktestspringsecurity.entity.UserInfo;
 import springsecurity.quicktestspringsecurity.repo.KhachHangRepo;
 

@@ -14,6 +14,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import springsecurity.quicktestspringsecurity.repo.KhachHangRepo;
 import springsecurity.quicktestspringsecurity.repo.NhanVienRepo;
@@ -35,6 +36,10 @@ public class SpringSecurityConfig {
     // UserDetailsService userDetailsService() {
     // return new UserInfoService(repository);
     // }
+    // @Bean
+    // public JwtAuthenticationFilter jwtAuthenticationFilter() {
+    // return new JwtAuthenticationFilter();
+    // }
 
     NhanVienInfoService nhanVienServer() {
         return new NhanVienInfoService(nvifrepository);
@@ -44,6 +49,10 @@ public class SpringSecurityConfig {
         return new KhachHangInfoService(khifrepository);
     }
 
+    @Bean
+    JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
     // @Override
     // protected void configure(AuthenticationManagerBuilder auth) throws Exception
     // {
@@ -56,18 +65,13 @@ public class SpringSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("api/v2/person/delete/**").authenticated();
-                })
-                .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("api/v2/person/**").permitAll();
-                })
-                .authorizeHttpRequests((authorize) -> {
                     authorize.anyRequest().permitAll();
                 })
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(Customizer.withDefaults())
                 .authenticationProvider(authenticationNVProvider())
                 .authenticationProvider(authenticationKHProvider());
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
