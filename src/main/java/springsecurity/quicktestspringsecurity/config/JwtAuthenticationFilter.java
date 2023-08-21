@@ -22,7 +22,6 @@ import springsecurity.quicktestspringsecurity.service.NhanVienInfoService;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
   @Autowired
   private JwtTokenProvider tokenProvider;
-
   @Autowired
   private NhanVienInfoService nhanvieninfoService;
   @Autowired
@@ -33,28 +32,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       HttpServletResponse response, FilterChain filterChain)
       throws ServletException, IOException {
     try {
+
       // Lấy jwt từ request
       String jwt = getJwtFromRequest(request);
 
       if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-        // Lấy id user từ chuỗi jwt
-        String userId = tokenProvider.getUserIdFromJWT(jwt);
-        // Lấy thông tin người dùng từ id
-        UserDetails userDetails = nhanvieninfoService.loadUserByUsername(userId);
-        UserDetails userDetails2 = khachhanginfoService.loadUserByUsername(userId);
-        if (userDetails != null) {
-          // Nếu người dùng hợp lệ, set thông tin cho Seturity Context
-          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
-              null, userDetails.getAuthorities());
-          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+        // Lấyemail từ chuỗi jwt
+        String userId = tokenProvider.getUsernameFromJWT(jwt);
+        // Lấy thông tin người dùng từ email
 
-          SecurityContextHolder.getContext().setAuthentication(authentication);
-        } else if (userDetails2 != null) {
-          // Nếu người dùng hợp lệ, set thông tin cho Seturity Context
-          UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails2,
-              null, userDetails2.getAuthorities());
-          authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-          SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (request.getRequestURI().contains("admin")) {
+          UserDetails userDetails = nhanvieninfoService.loadUserByUsername(userId);
+          if (userDetails != null) {
+            // Nếu người dùng hợp lệ, set thông tin cho Seturity Context
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails,
+                null, userDetails.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+          }
+        }
+        if (request.getRequestURI().contains("user")) {
+          UserDetails userDetails2 = khachhanginfoService.loadUserByUsername(userId);
+          if (userDetails2 != null) {
+            // Nếu người dùng hợp lệ, set thông tin cho Seturity Context
+            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails2,
+                null, userDetails2.getAuthorities());
+            authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+          }
         }
       }
     } catch (Exception ex) {

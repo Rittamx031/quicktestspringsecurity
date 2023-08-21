@@ -3,6 +3,8 @@ package springsecurity.quicktestspringsecurity.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.Customizer;
@@ -25,92 +27,138 @@ import springsecurity.quicktestspringsecurity.service.NhanVienInfoService;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SpringSecurityConfig {
+    @Bean
+    AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
+        return http.getSharedObject(AuthenticationManagerBuilder.class)
+                .build();
+    }
+
     @Autowired
-    NhanVienRepo nvifrepository;
-    @Autowired
-    KhachHangRepo khifrepository;
+    static NhanVienRepo nvifrepository;
 
-    // private final UserInfoRepository repository;
-
-    // @Bean
-    // UserDetailsService userDetailsService() {
-    // return new UserInfoService(repository);
-    // }
-    // @Bean
-    // public JwtAuthenticationFilter jwtAuthenticationFilter() {
-    // return new JwtAuthenticationFilter();
-    // }
-
-    NhanVienInfoService nhanVienServer() {
+    static NhanVienInfoService nhanVienServer() {
         return new NhanVienInfoService(nvifrepository);
     }
 
-    KhachHangInfoService KhachHangServer() {
+    @Bean
+    static AuthenticationProvider authenticationNVProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(nhanVienServer());
+        authenticationProvider.setPasswordEncoder(passwordEncoder2());
+        return authenticationProvider;
+    }
+
+    @Autowired
+    static KhachHangRepo khifrepository;
+
+    static KhachHangInfoService KhachHangServer() {
         return new KhachHangInfoService(khifrepository);
     }
 
     @Bean
-    JwtAuthenticationFilter jwtAuthenticationFilter() {
+    static JwtAuthenticationFilter jwtAuthenticationFilter() {
         return new JwtAuthenticationFilter();
     }
-    // @Override
-    // protected void configure(AuthenticationManagerBuilder auth) throws Exception
-    // {
-    // auth
-    // .authenticationProvider(authenticationProviderTable1())
-    // .authenticationProvider(authenticationProviderTable2());
-    // }
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests((authorize) -> {
-                    authorize.anyRequest().permitAll();
-                })
-                .csrf(AbstractHttpConfigurer::disable)
-                .httpBasic(Customizer.withDefaults())
-                .authenticationProvider(authenticationNVProvider())
-                .authenticationProvider(authenticationKHProvider());
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-
-    @Bean
-    AuthenticationProvider authenticationNVProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(nhanVienServer());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
-    }
-
-    @Bean
-    AuthenticationProvider authenticationKHProvider() {
+    static AuthenticationProvider authenticationKHProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
         authenticationProvider.setUserDetailsService(KhachHangServer());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        authenticationProvider.setPasswordEncoder(passwordEncoder2());
         return authenticationProvider;
     }
-    // @Bean
-    // UserDetailsService userDetailsService() {
 
-    // UserDetails ramesh = User.builder()
-    // .username("ph22358")
-    // .password(passwordEncoder().encode("ph22358"))
-    // .roles("USER")
-    // .build();
-
-    // UserDetails admin = User.builder()
-    // .username("admin")
-    // .password(passwordEncoder().encode("admin"))
-    // .roles("ADMIN")
-    // .build();
-
-    // return new InMemoryUserDetailsManager(ramesh, admin);
-    // }
-
-    @Bean
-    static PasswordEncoder passwordEncoder() {
+    // mã hóa mật khẩu
+    @Bean(name = "passwordEncoder2")
+    static PasswordEncoder passwordEncoder2() {
         return new BCryptPasswordEncoder();
     }
 
+    @Bean(name = "passwordEncoder")
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Configuration
+    @Order(1)
+    public static class App1ConfigurationAdapter {
+        @Bean
+        SecurityFilterChain filterChainApp1(HttpSecurity http) throws Exception {
+            // http.antMatcher("/admin*")
+            // .authorizeRequests()
+            // .anyRequest()
+            // .hasRole("ADMIN")
+
+            // .and()
+            // .formLogin()
+            // .loginPage("/loginAdmin")
+            // .loginProcessingUrl("/admin_login")
+            // .failureUrl("/loginAdmin?error=loginError")
+            // .defaultSuccessUrl("/adminPage")
+
+            // .and()
+            // .logout()
+            // .logoutUrl("/admin_logout")
+            // .logoutSuccessUrl("/protectedLinks")
+            // .deleteCookies("JSESSIONID")
+
+            // .and()
+            // .exceptionHandling()
+            // .accessDeniedPage("/403")
+
+            // .and()
+            // .csrf().disable();
+            http
+                    .authorizeHttpRequests((authorize) -> {
+                        authorize.anyRequest().permitAll();
+                    })
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .httpBasic(Customizer.withDefaults())
+                    .authenticationProvider(authenticationNVProvider());
+            http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            return http.build();
+        }
+    }
+
+    @Configuration
+    @Order(2)
+    public static class App2ConfigurationAdapter {
+
+        @Bean
+        SecurityFilterChain filterChainApp2(HttpSecurity http) throws Exception {
+            // http.antMatcher("/admin*")
+            // .authorizeRequests()
+            // .anyRequest()
+            // .hasRole("ADMIN")
+
+            // .and()
+            // .formLogin()
+            // .loginPage("/loginAdmin")
+            // .loginProcessingUrl("/admin_login")
+            // .failureUrl("/loginAdmin?error=loginError")
+            // .defaultSuccessUrl("/adminPage")
+
+            // .and()
+            // .logout()
+            // .logoutUrl("/admin_logout")
+            // .logoutSuccessUrl("/protectedLinks")
+            // .deleteCookies("JSESSIONID")
+
+            // .and()
+            // .exceptionHandling()
+            // .accessDeniedPage("/403")
+
+            // .and()
+            // .csrf().disable();
+            http
+                    .authorizeHttpRequests((authorize) -> {
+                        authorize.anyRequest().permitAll();
+                    })
+                    .csrf(AbstractHttpConfigurer::disable)
+                    .httpBasic(Customizer.withDefaults())
+                    .authenticationProvider(authenticationKHProvider());
+            http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            return http.build();
+        }
+    }
 }

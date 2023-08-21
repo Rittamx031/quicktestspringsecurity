@@ -20,7 +20,6 @@ public class NhanVienService {
     nhanvien.setPass(passwordEncoder.encode(nhanvien.getPass()));
     return repository.save(nhanvien);
   }
-
   public List<NhanVien> getAll() {
     return repository.findAll();
   }

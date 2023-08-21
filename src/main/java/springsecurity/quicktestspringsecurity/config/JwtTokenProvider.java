@@ -2,6 +2,8 @@ package springsecurity.quicktestspringsecurity.config;
 
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 /**
  * JwtTokenProvider
  */
@@ -14,18 +16,20 @@ import lombok.extern.slf4j.Slf4j;
 @Slf4j
 public class JwtTokenProvider {
   // Đoạn JWT_SECRET này là bí mật, chỉ có phía server biết
-  private final String JWT_SECRET = "lodaaaaaa";
+  @Value("${app.jwt-secret}")
+  private String JWT_SECRET;
 
   // Thời gian có hiệu lực của chuỗi jwt
-  private final long JWT_EXPIRATION = 604800000L;
+  @Value("${app-jwt-expiration-milliseconds}")
+  private long JWT_EXPIRATION;
 
   // Tạo ra jwt từ thông tin user
-  public String generateToken(UserInfoUserDetails userDetails) {
+  public String generateToken(Authentication authentication) {
     Date now = new Date();
     Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
     // Tạo chuỗi json web token từ id của user.
     return Jwts.builder()
-        .setSubject(userDetails.getUsername())
+        .setSubject(authentication.getName())
         .setIssuedAt(now)
         .setExpiration(expiryDate)
         .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
@@ -33,12 +37,11 @@ public class JwtTokenProvider {
   }
 
   // Lấy thông tin user từ jwt
-  public String getUserIdFromJWT(String token) {
+  public String getUsernameFromJWT(String token) {
     Claims claims = Jwts.parser()
         .setSigningKey(JWT_SECRET)
         .parseClaimsJws(token)
         .getBody();
-
     return claims.getSubject();
   }
 
