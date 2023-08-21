@@ -29,11 +29,18 @@ public class JwtTokenProvider {
     Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
     // Tạo chuỗi json web token từ id của user.
     return Jwts.builder()
-        .setSubject(authentication.getName())
+        .setSubject("authentication.getName()")
         .setIssuedAt(now)
         .setExpiration(expiryDate)
         .signWith(SignatureAlgorithm.HS512, JWT_SECRET)
         .compact();
+    // .setClaims(claims)
+    // return Jwts.builder()
+    // .setSubject(subject)
+    // .setIssuedAt(createdDate)
+    // .setExpiration(expirationDate)
+    // .signWith(SignatureAlgorithm.HS512, JwtConstants.SECRET)
+    // .compact();
   }
 
   // Lấy thông tin user từ jwt

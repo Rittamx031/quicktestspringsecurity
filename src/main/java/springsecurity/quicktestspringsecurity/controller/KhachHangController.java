@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -30,26 +31,30 @@ import springsecurity.quicktestspringsecurity.service.KhachHangService;
 public class KhachHangController {
   @Autowired
   KhachHangService service;
+
+  @Autowired
+  JwtTokenProvider jwtTokenProvider;
+
   @Autowired
   AuthenticationManager authenticationManager;
-  @Autowired
-  JwtTokenProvider JwtTokenProvider;
 
-  // @PostMapping(value = "singin")
-  // public ResponseEntity<KhachHang> singUp(@RequestBody KhachHang entity) {
-  // return ResponseEntity.ok().body(service.SingUp(entity));
-  // }
+  @PostMapping(value = "singup")
+  public ResponseEntity<KhachHang> singUp(@RequestBody KhachHang entity) {
+    return ResponseEntity.ok().body(service.SingUp(entity));
+  }
+
   @PostMapping(value = "singin")
-  public ResponseEntity<?> singUp(@RequestBody KhachHang entity) {
+  public ResponseEntity<?> singIn(@RequestBody KhachHang entity) {
     Authentication authentication = authenticationManager
         .authenticate(new UsernamePasswordAuthenticationToken(entity.getEmail(), entity.getPass()));
     SecurityContextHolder.getContext().setAuthentication(authentication);
-    String jwt = JwtTokenProvider.generateToken(authentication);
+    // System.out.println(authentication);
+    String jwt = jwtTokenProvider.generateToken(authentication);
+    System.out.println(jwt);
     UserInfoUserDetails userDetails = (UserInfoUserDetails) authentication.getPrincipal();
     return ResponseEntity.ok().body(
         new jwtResponse(jwt,
-            userDetails.getUsername(),
-            userDetails.getAuthorities().stream().map(item -> item.getAuthority()).collect(Collectors.toList())));
+            userDetails.getUsername()));
   }
 
   @GetMapping(value = "getall")

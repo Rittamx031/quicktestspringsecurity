@@ -18,11 +18,13 @@ public class jwtResponse {
   private String token;
   private String type = "Bearer";
   private String email;
-  private List<String> Roles;
+  // private List<String> Roles;
 
-  public jwtResponse(String token, String email, List<String> Roles) {
+  public jwtResponse(String token, String email
+  // , List<String> Roles
+  ) {
     this.token = token;
     this.email = email;
-    this.Roles = Roles;
+    // this.Roles = Roles;
   }
 }

@@ -26,20 +26,11 @@ public class KhachHangInfoService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) {
     Optional<KhachHang> khachhang = repository.getuser(username);
-    if (!khachhang.isPresent()) {
+    if (!khachhang.isPresent() || khachhang == null) {
       throw new UsernameNotFoundException("can not find nhan vien with username khachhang");
     }
     String Roles = "USER";
     UserInfo userinfo = new UserInfo(khachhang.get().getEmail(), khachhang.get().getPass(), Roles);
     return new UserInfoUserDetails(userinfo);
-  }
-
-  public KhachHang SingUp(KhachHang khachHang) {
-    khachHang.setPass(passwordEncoder.encode(khachHang.getPass()));
-    return repository.save(khachHang);
-  }
-
-  public List<KhachHang> getAll() {
-    return repository.findAll();
   }
 }

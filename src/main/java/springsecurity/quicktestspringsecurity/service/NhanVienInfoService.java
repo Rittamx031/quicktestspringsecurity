@@ -21,7 +21,7 @@ public class NhanVienInfoService implements UserDetailsService {
   @Override
   public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
     Optional<NhanVien> nhanvien = repository.getuser(username);
-    if (!nhanvien.isPresent()) {
+    if (!nhanvien.isPresent() || nhanvien == null) {
       throw new UsernameNotFoundException("can not find nhan vien with username nhanvien");
     }
     String Roles = nhanvien.get().getIdCV().getTenCV();
